@@ -1,5 +1,6 @@
-import RPi.GPIO as gpio
+import RPi.GPIO as gpio #lgpio library
 import time
+#Change to pins you are using
 R1 = 22
 R2 = 16
 L1 = 18
