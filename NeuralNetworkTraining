@@ -1,0 +1,84 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+import pandas as pd
+
+# =========================
+# Step 1: Define the Neural Network
+# =========================
+class RobotNN(nn.Module):
+    def __init__(self, input_size, hidden_size=64, output_size=4):
+        super(RobotNN, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, output_size)  # 4 possible actions
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)  
+        return x  # No softmax (CrossEntropyLoss will handle that)
+
+
+# =========================
+# Step 2: Load Training Data from CSV
+# =========================
+def load_training_data(csv_file):
+    """
+    Loads Lidar scan data and actions from a CSV file.
+    The CSV is expected to have:
+    - First N columns: Lidar scan data (angle + distance pairs)
+    - Last column: Action (0=Forward, 1=Left, 2=Right, 3=Stop)
+    """
+    df = pd.read_csv(csv_file)
+    
+    # Extract input features (all columns except the last)
+    X = df.iloc[:, :-1].values  # Lidar scan data
+    y = df.iloc[:, -1].values   # Actions
+
+    # Normalize input data (scale to -1 to 1)
+    X = (X / np.max(X)) * 2 - 1
+
+    return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
+
+
+# =========================
+# Step 3: Train the AI Model
+# =========================
+def train_model(csv_file, num_epochs=100, learning_rate=0.01):
+    # Load data
+    X_train, y_train = load_training_data(csv_file)
+    input_size = X_train.shape[1]  # Dynamically determine input size
+
+    # Initialize model
+    model = RobotNN(input_size=input_size)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+    # Training loop
+    for epoch in range(num_epochs):
+        optimizer.zero_grad()
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+        loss.backward()
+        optimizer.step()
+
+        if epoch % 10 == 0:
+            print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.4f}')
+
+    print("Training complete!")
+
+    # Save the trained model
+    torch.save(model.state_dict(), "robot_model.pth")
+    print("Model saved successfully!")
+
+
+# =========================
+# Step 4: Run Training
+# =========================
+csv_filename = "training_data.csv"  # Change this to your CSV file name
+train_model(csv_filename)
