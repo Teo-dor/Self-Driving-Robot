@@ -101,11 +101,11 @@ def run():
             print("Saved!\n")
             init()
             if (action == 'w'):
-                forward(0.05)
+                forward(0.1)
             elif (action == 'a'):  
-                left_turn(0.05)    
+                left_turn(0.1)    
             elif (action == 'd'):
-                right_turn(0.05)
+                right_turn(0.1)
     except KeyboardInterrupt:
         print("\nStopping. Data saved.")
     except RPLidarException as e:
