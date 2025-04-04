@@ -3,7 +3,6 @@ import time
 import RPi.GPIO as GPIO
 from rplidar import RPLidar, RPLidarException
 import json
-
 R1 = 22
 R2 = 16
 L1 = 18
@@ -111,10 +110,13 @@ def run():
     except RPLidarException as e:
         print(f"RPLidar Error: {e}")
     finally:
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(motorPin, GPIO.OUT)
         GPIO.output(motorPin, GPIO.LOW)
         lidar.stop()
         lidar.disconnect()
         GPIO.cleanup()
 
 if __name__ == "__main__":
+    init()
     run()
