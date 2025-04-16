@@ -10,15 +10,15 @@ from sklearn.model_selection import train_test_split
 # Step 1: Define the Neural Network
 # =========================
 class RobotNN(nn.Module):
-    def __init__(self, input_size, hidden_size=256, output_size=4):  # Increase hidden size
+    def __init__(self, input_size, hidden_size=512, output_size=4):  # Increase hidden size
         super(RobotNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
-        self.dropout1 = nn.Dropout(p=0.2)
+        self.dropout1 = nn.Dropout(p=0.3)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.dropout2 = nn.Dropout(p=0.2)
+        self.dropout2 = nn.Dropout(p=0.3)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.dropout3 = nn.Dropout(p=0.2)
+        self.dropout3 = nn.Dropout(p=0.3)
         self.fc4 = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
@@ -50,18 +50,23 @@ def load_training_data(csv_file, max_length=360):
     # Parse the JSON-like strings in the first column
     lidar_data = df.iloc[:, 0].apply(ast.literal_eval)  # Convert strings to Python lists
 
-    # Flatten the Lidar scan data (convert [angle, distance] pairs to a flat array)
-    X = lidar_data.apply(lambda scan: [item for pair in scan for item in pair]).tolist()
+    # Create a 360-item array for each Lidar scan
+    def process_scan(scan):
+        distances = [0] * max_length  # Initialize array with zeros
+        for angle, distance in scan:
+            rounded_angle = round(angle)  # Round angle to the nearest integer
+            if 0 <= rounded_angle < max_length:  # Ensure angle is within bounds
+                distances[rounded_angle] = distance
+        return distances
 
-    # Pad or truncate each row to ensure consistent length
-    X = [row[:max_length * 2] + [0] * (max_length * 2 - len(row)) if len(row) < max_length * 2 else row[:max_length * 2] for row in X]
+    X = lidar_data.apply(process_scan).tolist()
+
+    # Normalize distances (scale between -1 and 1)
+    X = np.array(X)
+    X = (X / np.max(X)) * 2 - 1
 
     # Extract the action labels (last column)
     y = df.iloc[:, 1].values
-
-    X = np.array(X)  # Convert to NumPy array
-    X[:, 1::2] = (X[:, 1::2] / np.max(X[:, 1::2])) * 2 - 1  # Normalize distances
-    X[:, 0::2] = (X[:, 0::2] / np.max(X[:, 0::2])) * 2 - 1  # Normalize angles
 
     # Split data into training and validation sets
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -109,11 +114,11 @@ def train_model(csv_file, num_epochs=150, learning_rate=0.001):
             best_val_loss = val_loss.item()
             counter = 0
             torch.save(model.state_dict(), "best_model.pth")  # Save the best model
-        else:
-            counter += 1
-            if counter >= patience:
-                print("Early stopping triggered.")
-                break
+        #else:
+            #counter += 1
+            #if counter >= patience:
+                #print("Early stopping triggered.")
+                #break
 
     print("Training complete!")
 
