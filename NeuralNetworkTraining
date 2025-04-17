@@ -6,12 +6,18 @@ import pandas as pd
 import ast
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
+import matplotlib.pyplot as plt  # Add this import at the top of your file
 
 # =========================
 # Step 1: Define the Neural Network
 # =========================
+hidden_size = 1536  
+num_epochs = 300
+learning_rate = 0.0005
+batch_size = 512
+factor = 0.8
 class RobotNN(nn.Module):
-    def __init__(self, input_size, hidden_size=1024, output_size=4):  # Increase hidden size
+    def __init__(self, input_size, hidden_size=hidden_size, output_size=4):
         super(RobotNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
@@ -78,7 +84,7 @@ def load_training_data(csv_file, max_length=360):
 # =========================
 # Step 3: Train the AI Model
 # =========================
-def train_model(csv_file, num_epochs=300, learning_rate=0.0001, batch_size=256):
+def train_model(csv_file, num_epochs=num_epochs, learning_rate=learning_rate, batch_size=batch_size):
     # Load data
     X_train, X_val, y_train, y_val = load_training_data(csv_file)
     input_size = X_train.shape[1]  # Dynamically determine input size
@@ -95,14 +101,23 @@ def train_model(csv_file, num_epochs=300, learning_rate=0.0001, batch_size=256):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 
+    # Add a learning rate scheduler
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=factor, patience=10)
+
     # Early stopping parameters
     best_val_loss = float('inf')
-    patience = 10  # Number of epochs to wait before stopping
-    counter = 0
+    best_epoch = -1
+    best_train_loss = None
+    best_lr = None
+
+    # Lists to store loss values for plotting
+    train_losses = []
+    val_losses = []
 
     # Training loop
     for epoch in range(num_epochs):
         model.train()
+        epoch_train_loss = 0
         for X_batch, y_batch in train_loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
             optimizer.zero_grad()
@@ -110,6 +125,10 @@ def train_model(csv_file, num_epochs=300, learning_rate=0.0001, batch_size=256):
             loss = criterion(outputs, y_batch)
             loss.backward()
             optimizer.step()
+            epoch_train_loss += loss.item()
+
+        epoch_train_loss /= len(train_loader)  # Average training loss
+        train_losses.append(epoch_train_loss)
 
         # Evaluate on validation set
         model.eval()
@@ -120,25 +139,44 @@ def train_model(csv_file, num_epochs=300, learning_rate=0.0001, batch_size=256):
                 val_outputs = model(X_batch)
                 val_loss += criterion(val_outputs, y_batch).item()
         val_loss /= len(val_loader)  # Average validation loss
-        if epoch % 10 == 0:  # Print every 10 epochs    
-            print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.4f}, Val Loss: {val_loss:.4f}')
+        val_losses.append(val_loss)
 
-        # Early stopping logic
+        # Step the scheduler
+        scheduler.step(val_loss)
+
+        # Print learning rate and losses every 10 epochs
+        current_lr = scheduler.optimizer.param_groups[0]['lr']  # Get current learning rate
+        
+        print(f'Epoch [{epoch}/{num_epochs}], Loss: {epoch_train_loss:.4f}, Val Loss: {val_loss:.4f}, LR: {current_lr:.6f}')
+
+        # Update best epoch info
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            counter = 0
+            best_epoch = epoch
+            best_train_loss = epoch_train_loss
+            best_lr = current_lr
             torch.save(model.state_dict(), "best_model.pth")  # Save the best model
-        #else:
-            #counter += 1
-            #if counter >= patience:
-             #   print("Early stopping triggered.")
-              #  break
 
     print("Training complete!")
+
+    # Print the best epoch info
+    print(f"Best Epoch: {best_epoch}")
+    print(f"Epoch [{best_epoch}/300] Loss: {best_train_loss:.4f}, Val Loss: {best_val_loss:.4f}, LR: {best_lr:.6f}")
 
     # Save the trained model
     torch.save(model.state_dict(), "robot_model.pth")
     print("Model saved successfully!")
+
+    # Plot training and validation loss
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(num_epochs), train_losses, label='Training Loss')
+    plt.plot(range(num_epochs), val_losses, label='Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Training and Validation Loss')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
 
 # =========================
