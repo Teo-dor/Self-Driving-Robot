@@ -13,15 +13,15 @@ R1, R2, L1, L2 = 22, 16, 18, 13
 # Define the Neural Network
 # =========================
 class RobotNN(nn.Module):
-    def __init__(self, input_size, hidden_size=256, output_size=4):  # Match NN.py
+    def __init__(self, input_size, hidden_size=1024, output_size=3):  # Match NN.py
         super(RobotNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
-        self.dropout1 = nn.Dropout(p=0.3)
+        self.dropout1 = nn.Dropout(p=0.4)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.dropout2 = nn.Dropout(p=0.3)
+        self.dropout2 = nn.Dropout(p=0.4)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.dropout3 = nn.Dropout(p=0.3)
+        self.dropout3 = nn.Dropout(p=0.4)
         self.fc4 = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
@@ -37,7 +37,6 @@ class RobotNN(nn.Module):
         x = self.fc4(x)
         return x
 
-# Initialize GPIO
 def init():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(R1, GPIO.OUT)
@@ -86,10 +85,9 @@ def left_turn(sec):
 # Load the trained model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Dynamically determine the input size from the saved model
-input_size = 720  # Set this to match the input size used during training
+input_size = 360 # One neuron per angle
 model = RobotNN(input_size=input_size).to(device)  # Initialize with correct input size
-model.load_state_dict(torch.load("robot_model.pth", map_location=device))  # Load weights
+model.load_state_dict(torch.load("best_model.pth", map_location=device))  # Load weights
 model.eval()
 
 # Lidar setup
@@ -102,16 +100,21 @@ stop_event = threading.Event()
 def preprocess_lidar_scan(scan, max_length=360):
     """
     Preprocesses a single Lidar scan for the neural network.
-    - Flatten the [angle, distance] pairs.
-    - Pad or truncate to ensure consistent length.
-    - Normalize distances.
+    - Converts [angle, distance] pairs into a 360-item array.
+    - Normalizes distances to the range [-1, 1].
     """
-    flattened_scan = [item for pair in scan for item in pair]
-    processed_scan = flattened_scan[:max_length * 2] + [0] * (max_length * 2 - len(flattened_scan))
-    processed_scan = np.array(processed_scan)
-    if np.max(processed_scan[1::2]) > 0:  # Avoid division by zero
-        processed_scan[1::2] = (processed_scan[1::2] / np.max(processed_scan[1::2])) * 2 - 1  # Normalize distances
-    return torch.tensor(processed_scan, dtype=torch.float32).unsqueeze(0).to(device)  # Add batch dimension
+    distances = [0] * max_length  # Initialize array with zeros
+    for angle, distance in scan:
+        rounded_angle = round(angle)  # Round angle to the nearest integer
+        if 0 <= rounded_angle < max_length:  # Ensure angle is within bounds
+            distances[rounded_angle] = distance
+
+    # Normalize distances (scale between -1 and 1)
+    distances = np.array(distances)
+    if np.max(distances) > 0:  # Avoid division by zero
+        distances = (distances / np.max(distances)) * 2 - 1
+
+    return torch.tensor(distances, dtype=torch.float32).unsqueeze(0).to(device)  # Add batch dimension
 
 def scan_thread():
     """
@@ -136,16 +139,14 @@ def execute_action(action):
     - 0: Forward
     - 1: Left
     - 2: Right
-    - 3: Stop
     """
     if action == 0:
-        forward(0.1)  # Move forward for 0.1 seconds
+        forward(0.2)  # Move forward for 0.1 seconds
     elif action == 1:
-        left_turn(0.05)  # Turn left for 0.05 seconds
+        left_turn(0.1)  # Turn left for 0.1 seconds
     elif action == 2:
-        right_turn(0.05)  # Turn right for 0.05 seconds
-    elif action == 3:
-        stop()  # Stop the robot
+        right_turn(0.1)  # Turn right for 0.1 seconds
+    
 
 def control_robot():
     """
@@ -167,9 +168,12 @@ def control_robot():
             # Predict the action
             with torch.no_grad():
                 output = model(input_data)
+                probabilities = torch.softmax(output, dim=1).cpu().numpy()[0]  # Convert to probabilities
                 predicted_action = torch.argmax(output, dim=1).item()
 
-            # Execute the action
+            # Debugging: Print the probabilities and chosen action
+            print(f"Probabilities: {probabilities}, Chosen Action: {predicted_action}")
+
             execute_action(predicted_action)
 
     except KeyboardInterrupt:
@@ -181,19 +185,17 @@ if __name__ == "__main__":
     try:
         init()
         GPIO.setup(11, GPIO.OUT)  # Lidar motor control pin
-        GPIO.output(11, GPIO.HIGH)  # Ensure Lidar motor is powered on
+        GPIO.output(11, GPIO.HIGH)  
         time.sleep(0.5)
 
-        # Start the Lidar scanning thread
         thread = threading.Thread(target=scan_thread, daemon=True)
         thread.start()
 
-        # Start the robot control loop
         control_robot()
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        stop_event.set()  # Ensure the scanning thread stops
+        stop_event.set()  
     finally:
         # Cleanup resources
         if thread.is_alive():
