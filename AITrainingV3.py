@@ -110,6 +110,33 @@ def get_key():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
+def count_csv_rows(file_path):
+    """Counts the number of rows in the CSV file."""
+    try:
+        with open(file_path, mode="r") as file:
+            return sum(1 for _ in file)
+    except FileNotFoundError:
+        return 0
+
+def count_action_distribution(file_path):
+    """Counts the distribution of actions in the CSV file."""
+    action_counts = {0: 0, 1: 0, 2: 0, 3: 0}  # Initialize counts for actions: Forward, Left, Right, Stop
+    try:
+        with open(file_path, mode="r") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                try:
+                    if len(row) > 1:  # Ensure the row has both scan data and action
+                        action = int(row[1])  # Action is in the second column
+                        if action in action_counts:
+                            action_counts[action] += 1
+                except (ValueError, IndexError):
+                    # Skip rows with invalid format
+                    continue
+    except FileNotFoundError:
+        print("CSV file not found.")
+    return action_counts
+
 def run():
     init()
     GPIO.output(motorPin, GPIO.HIGH)  # Ensure Lidar motor is powered on
@@ -137,9 +164,9 @@ def run():
                 if key == 'w':
                     forward(0.1)
                 elif key == 'a':
-                    left_turn(0.1)
+                    left_turn(0.05)
                 elif key == 'd':
-                    right_turn(0.1)
+                    right_turn(0.05)
                 elif key == 's':
                     stop()
                 print("Saved scan + action.")
@@ -155,6 +182,17 @@ def run():
         GPIO.setup(motorPin, GPIO.OUT)
         GPIO.output(motorPin, GPIO.LOW)  # Turn off Lidar motor
         GPIO.cleanup()
+
+        
+
+        action_counts = count_action_distribution(CSV_FILE)
+        row_count = count_csv_rows(CSV_FILE) - action_counts[3]  # Exclude stop actions from the count
+        print(f"Total sets of training data: {row_count}") 
+        print("Action distribution:")
+        print(f"  Forward: {action_counts[0]} {action_counts[0] / row_count * 100:.2f}%")
+        print(f"  Left: {action_counts[1]} {action_counts[1] / row_count * 100:.2f}%")
+        print(f"  Right: {action_counts[2]} {action_counts[2] / row_count * 100:.2f}%")
+
 
 if __name__ == "__main__":
     run()
