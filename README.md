@@ -13,10 +13,11 @@
 
 ## Results
 ### Obstacle Avoidance examples: 
-https://youtube.com/shorts/SGHYgmjyyp0?feature=share
+[![Watch the video](https://img.youtube.com/vi/SGHYgmjyyp0/0.jpg)](https://youtube.com/shorts/SGHYgmjyyp0)
+
 
 ### AI Driving code examples: 
-https://youtube.com/shorts/bPrBhbUk3TI?feature=share
+[![Watch the video](https://img.youtube.com/vi/bPrBhbUk3TI/0.jpg)](https://youtube.com/shorts/bPrBhbUk3TI)
 
 ### Mapping
 <div style="white-space: nowrap;">
