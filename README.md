@@ -16,8 +16,12 @@ Obstacle Avoidance code example: https://youtube.com/shorts/SGHYgmjyyp0?feature=
 
 AI Driving code example: https://youtube.com/shorts/bPrBhbUk3TI?feature=share
 
+<img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLDKBu1quS4KutIjbpPKEqSpFUsuHSEGcGNojUaWF_PXrPOQYdQl4eqrUw2CAfzKRA8ICRd2M6srVaqvIsv5aTqqumhd6P_g8RYG7BfdRC8w1zKCbxfZg=s1600" alt="The robot in a room" style="width:200px;"/>
 
-![The robot in a room](https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLDKBu1quS4KutIjbpPKEqSpFUsuHSEGcGNojUaWF_PXrPOQYdQl4eqrUw2CAfzKRA8ICRd2M6srVaqvIsv5aTqqumhd6P_g8RYG7BfdRC8w1zKCbxfZg=s1600)
-![The mapping done by the robot](https://keep.google.com/u/0/media/v2/1PrDpxvK3JeeY2wv9h_CR5B1DtruU38Lhe2Ajy0JqTeynKbLPMKu-USaIpGqVmws/1hr2I3lWLyZjMey8DwtWH7B0nr0qEfvLpvgmKy-RFuAo8HQwS0yEXcaDB6FbcNA?accept=image%2Fgif%2Cimage%2Fjpeg%2Cimage%2Fjpg%2Cimage%2Fpng%2Caudio%2Faac&sz=996)
-![The mapping and room overlapping](https://keep.google.com/u/0/media/v2/1Fv8Gc1toRHaYtbnImu13X0gQZngPQCclxPGZ5DSkRbBKjztBdLLj7ptHzJM-9A/1xdsNCcHPGWcxvcc77-8RIFCxbZ6zLiR7AgbRGIigcaH8dVq14qyYaKsrfT0Lsg?accept=image%2Fgif%2Cimage%2Fjpeg%2Cimage%2Fjpg%2Cimage%2Fpng%2Caudio%2Faac&sz=1068)
+<img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLjp5RmhOXhdWpxxtCPAG_0hj2_bFq6lGM_8KMj5ePQJPVv21pYKZz4jFO6RlMhoeH2Zm725FuYuz_GLTlOG_-0mmGnYRk0zvjbhaYL8q_Ml9QLUASOLg=s996" style="width:200px;"/>
+
+<img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLfYiEYUzYCs7YnzSu4_DMS_cEiJtBXHdAjfwSFHkhU_-fMs1XEP_XxAMtXAodizsy_UMRfbw0ISLEL3DPJyXJT6DUzn0cHJqStO3Gwh865NNMu0kfb9Q=s1068" alt="The mapping done by the robot" style="width:200px;"/>
+
+
+
 
