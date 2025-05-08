@@ -10,51 +10,54 @@ import tty
 
 # GPIO motor pins
 R1, R2, L1, L2 = 22, 16, 18, 13
+ENB = 32
 
+right_pwm = 80
 def init():
+    global pwm
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(R1, GPIO.OUT)
     GPIO.setup(R2, GPIO.OUT)
     GPIO.setup(L1, GPIO.OUT)
     GPIO.setup(L2, GPIO.OUT)
+    GPIO.setup(ENB, GPIO.OUT)
+    pwm = GPIO.PWM(ENB, 1000)
+    pwm.start(0)
 
 def stop():
     GPIO.output(R1, False)
     GPIO.output(R2, False)
     GPIO.output(L1, False)
     GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(0) 
 
-def forward(sec):
+def forward():
     GPIO.output(R1, False)
+    GPIO.output(L2, False)
     GPIO.output(R2, True)
     GPIO.output(L1, True)
-    GPIO.output(L2, False)
-    time.sleep(sec)
-    stop()
+    pwm.ChangeDutyCycle(right_pwm)  
 
-def reverse(sec):
+def reverse():
     GPIO.output(R1, True)
     GPIO.output(R2, False)
     GPIO.output(L1, False)
     GPIO.output(L2, True)
-    time.sleep(sec)
-    stop()
+    pwm.ChangeDutyCycle(right_pwm)
 
-def right_turn(sec):
+def right_turn():
     GPIO.output(R1, True)
     GPIO.output(R2, False)
     GPIO.output(L1, True)
     GPIO.output(L2, False)
-    time.sleep(sec)
-    stop()
+    pwm.ChangeDutyCycle(right_pwm) 
 
-def left_turn(sec):
+def left_turn():
     GPIO.output(R1, False)
     GPIO.output(R2, True)
     GPIO.output(L1, False)
     GPIO.output(L2, True)
-    time.sleep(sec)
-    stop()
+    pwm.ChangeDutyCycle(right_pwm) 
 
 # Lidar Setup
 PORT_NAME = '/dev/ttyUSB0'
