@@ -10,46 +10,61 @@ motorPin = 11
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 GPIO.setup(motorPin, GPIO.OUT, initial=GPIO.LOW)
-R1 = 22
-R2 = 16
-L1 = 18
-L2 = 13
+
 obstacleCooldown = 1/10 #Dont get stuck next to an obstacle, 1s = about 3 quarters of a lap
 obstacleTime = 0
 SAFE_DISTANCE = 200  # Example threshold distance in mm
 
-def init():    
+R1, R2, L1, L2 = 22, 16, 15, 13
+ENB = 32
+
+right_pwm = 80
+def init():
+    global pwm
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(R1, GPIO.OUT)
     GPIO.setup(R2, GPIO.OUT)
     GPIO.setup(L1, GPIO.OUT)
     GPIO.setup(L2, GPIO.OUT)
-    GPIO.setup(motorPin, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(ENB, GPIO.OUT)
+    pwm = GPIO.PWM(ENB, 1000)
+    pwm.start(0)
+
+def stop():
+    GPIO.output(R1, False)
+    GPIO.output(R2, False)
+    GPIO.output(L1, False)
+    GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(0) 
+
 def forward():
     GPIO.output(R1, False)
+    GPIO.output(L2, False)
     GPIO.output(R2, True)
     GPIO.output(L1, True)
-    GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(right_pwm)  
+
 def reverse():
     GPIO.output(R1, True)
     GPIO.output(R2, False)
     GPIO.output(L1, False)
     GPIO.output(L2, True)
+    pwm.ChangeDutyCycle(100)
+
 def right_turn():
     GPIO.output(R1, True)
     GPIO.output(R2, False)
     GPIO.output(L1, True)
     GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(right_pwm) 
+
 def left_turn():
     GPIO.output(R1, False)
     GPIO.output(R2, True)
     GPIO.output(L1, False)
     GPIO.output(L2, True)
-def stopMotor():
-    GPIO.output(R1, False)
-    GPIO.output(R2, False)
-    GPIO.output(L1, False)
-    GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(right_pwm) 
+
 lidar_data = []
 
 def run():
@@ -85,7 +100,7 @@ def run():
     GPIO.output(motorPin, GPIO.LOW)
     lidar.stop()
     lidar.disconnect() 
-    stopMotor()
+    stop()
     GPIO.cleanup()
     
 
