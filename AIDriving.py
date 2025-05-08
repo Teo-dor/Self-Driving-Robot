@@ -37,50 +37,53 @@ class RobotNN(nn.Module):
         x = self.fc4(x)
         return x
 
+ENB = 32
+
+right_pwm = 80
 def init():
+    global pwm
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(R1, GPIO.OUT)
     GPIO.setup(R2, GPIO.OUT)
     GPIO.setup(L1, GPIO.OUT)
     GPIO.setup(L2, GPIO.OUT)
+    GPIO.setup(ENB, GPIO.OUT)
+    pwm = GPIO.PWM(ENB, 1000)
+    pwm.start(0)
 
 def stop():
     GPIO.output(R1, False)
     GPIO.output(R2, False)
     GPIO.output(L1, False)
     GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(0)
 
 def forward(sec):
     GPIO.output(R1, False)
+    GPIO.output(L2, False)
     GPIO.output(R2, True)
     GPIO.output(L1, True)
-    GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(right_pwm) 
     time.sleep(sec)
-    stop()
-
-def reverse(sec):
-    GPIO.output(R1, True)
-    GPIO.output(R2, False)
-    GPIO.output(L1, False)
-    GPIO.output(L2, True)
-    time.sleep(sec)
-    stop()
+    stop() 
 
 def right_turn(sec):
     GPIO.output(R1, True)
     GPIO.output(R2, False)
     GPIO.output(L1, True)
     GPIO.output(L2, False)
+    pwm.ChangeDutyCycle(right_pwm) 
     time.sleep(sec)
-    stop()
+    stop() 
 
 def left_turn(sec):
     GPIO.output(R1, False)
     GPIO.output(R2, True)
     GPIO.output(L1, False)
     GPIO.output(L2, True)
+    pwm.ChangeDutyCycle(right_pwm) 
     time.sleep(sec)
-    stop()
+    stop() 
 
 # Load the trained model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
