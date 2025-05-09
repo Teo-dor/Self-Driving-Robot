@@ -23,9 +23,9 @@
 
 ### Mapping
 <div style="white-space: nowrap;">
-  <img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLDKBu1quS4KutIjbpPKEqSpFUsuHSEGcGNojUaWF_PXrPOQYdQl4eqrUw2CAfzKRA8ICRd2M6srVaqvIsv5aTqqumhd6P_g8RYG7BfdRC8w1zKCbxfZg=s1600" alt="The robot in a room" style="width:300px; display:inline-block; margin-right:30px;"/>
-  <img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLjp5RmhOXhdWpxxtCPAG_0hj2_bFq6lGM_8KMj5ePQJPVv21pYKZz4jFO6RlMhoeH2Zm725FuYuz_GLTlOG_-0mmGnYRk0zvjbhaYL8q_Ml9QLUASOLg=s996" style="width:300px; display:inline-block; margin-right:30px;"/>
-  <img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLfYiEYUzYCs7YnzSu4_DMS_cEiJtBXHdAjfwSFHkhU_-fMs1XEP_XxAMtXAodizsy_UMRfbw0ISLEL3DPJyXJT6DUzn0cHJqStO3Gwh865NNMu0kfb9Q=s1068" alt="The mapping done by the robot" style="width:300px; display:inline-block; margin-right:30px;"/>
+  <img src="https://imgur.com/ugmcXL0.jpg" alt="The robot in a room" style="width:300px; display:inline-block; margin-right:30px;"/>
+  <img src="https://imgur.com/B1TEH8d.jpg" style="width:300px; display:inline-block; margin-right:30px;"/>
+  <img src="https://imgur.com/doTT6dr.jpg" alt="The mapping done by the robot" style="width:400px; display:inline-block; margin-right:30px;"/>
 </div>
 
 
