@@ -19,6 +19,8 @@
 ### AI Driving code examples: 
 [![Watch the video](https://img.youtube.com/vi/bPrBhbUk3TI/0.jpg)](https://youtube.com/shorts/bPrBhbUk3TI)
 
+[![Watch the video](https://img.youtube.com/vi/kbC7o1Y1Ngw/0.jpg)](https://www.youtube.com/shorts/kbC7o1Y1Ngw)
+
 ### Mapping
 <div style="white-space: nowrap;">
   <img src="https://lh3.googleusercontent.com/keep-bbsk/AFgXFlLDKBu1quS4KutIjbpPKEqSpFUsuHSEGcGNojUaWF_PXrPOQYdQl4eqrUw2CAfzKRA8ICRd2M6srVaqvIsv5aTqqumhd6P_g8RYG7BfdRC8w1zKCbxfZg=s1600" alt="The robot in a room" style="width:300px; display:inline-block; margin-right:30px;"/>
